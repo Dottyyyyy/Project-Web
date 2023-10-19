@@ -1,19 +1,47 @@
 import React, { Fragment, useEffect, useState } from 'react'
 import '../../App.css'
 import Search from './Search'
-import { Link } from 'react-router-dom'
-import { getUser } from '../../utils/helpers';
-
+import { Link, useNavigate } from 'react-router-dom'
+import { getUser, logout } from '../../utils/helpers';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 const Header = () => {
 
     const [user, setUser] = useState('')
+    const navigate = useNavigate()
+    const logoutUser = async () => {
+        
+        try {
+            await axios.get(`${process.env.REACT_APP_API}/api/v1/logout`)
+            
+            setUser('')
+           
+            logout(()=> navigate('/'))
+        } catch (error) {
+            toast.error(error.response.data.message)
+            
+        } 
+    }
+    const logoutHandler = () => {
+        logoutUser();
+        toast.success('log out', {
+            position: toast.POSITION.BOTTOM_RIGHT
+        });
+    }
     useEffect(() => {
         setUser(getUser())
-    }, [user])
+    }, [])
     return (
         <Fragment>
             <nav className="navbar row">
-	@@ -18,7 +23,34 @@ const Header = () => {
+                <div className="col-12 col-md-3">
+                    <div className="navbar-brand">
+                        <img src="./images/shopit_logo.png" />
+                    </div>
+                </div>
+                <div className="col-12 col-md-6 mt-2 mt-md-0">
+                    <Search />
                 </div>
 
                 <div className="col-12 col-md-3 mt-4 mt-md-0 text-center">
@@ -36,8 +64,8 @@ const Header = () => {
                             <Link className="dropdown-item" to="/orders/me">Orders</Link>
                             <Link className="dropdown-item" to="/me">Profile</Link>
 
-                            <Link 
-                            // className="dropdown-item text-danger" to="/" onClick={logoutHandler}
+                            <Link
+                                className="dropdown-item text-danger" to="/" onClick={logoutHandler}
                             >
                                 Logout
                             </Link>
@@ -48,3 +76,10 @@ const Header = () => {
 
                     <span id="cart" className="ml-3">Cart</span>
                     <span className="ml-1" id="cart_count">2</span>
+                </div>
+            </nav>
+        </Fragment>
+    )
+}
+
+export default Header
